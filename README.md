@@ -9,6 +9,17 @@ This repository re-envisions the Humane AI Pin by developing four novel prototyp
 4. **Point-&-Pair SmartThings Assist** – reads an appliance's logo/QR code with the camera, fetches pairing instructions from SmartThings, and displays voice commands on your hand; one tap pairs the device via BLE/Wi‑Fi.
 
 ## Quick Start
+```bash
+pip install -r python/requirements.txt
+npm install --prefix node
+./dev_run.sh
+```
+
+### API Endpoints
+- `GET /mood?file=sample.wav` – Mood-Mirror Coach
+- `GET /safety?file=assets/demo_bike.mp4` – Spatial Safety Bubble
+- `GET /health` – server status
+
 ### Python
 ```bash
 python3 -m venv .venv
@@ -57,3 +68,4 @@ See the notebook `python/notebooks/demo_spatial_safety.ipynb` for a demo calling
 | Sprint 0 | Week 0 | Set up dev kits, define stories & storyboards | Persona & journey maps; hardware rig | Low-mid fidelity; requires 1 designer |
 | Sprint 1 | Weeks 1–2 | Build Mood-Mirror & Safety Bubble prototypes | Functional PoC videos; user testing reports | Mid-fidelity; occasional ML engineer for tuning |
 | Sprint 2 | Weeks 3–4 | Build Palm-Prompter & SmartThings Assist | Integrated demos; developer handoff docs | Mid-high fidelity; integrator to link with SmartThings |
+

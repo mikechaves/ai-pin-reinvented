@@ -10,6 +10,10 @@ app.get('/', (req, res) => {
   res.json({ status: 'AI Pin API ready' });
 });
 
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', use_cases: ['mood', 'safety'] });
+});
+
 app.get('/mood', async (req, res) => {
   const file = req.query.file;
   if (!file || /[^\w.-]/.test(file)) {
@@ -54,15 +58,10 @@ app.get('/safety', (req, res) => {
     return res.status(400).json({ error: 'Missing file parameter' });
   }
 
-  const rootDir = path.join(__dirname, '..');
-  const clipPath = path.resolve(rootDir, file);
-  if (!clipPath.startsWith(rootDir + path.sep)) {
-    return res.status(400).json({ error: 'Invalid file path' });
-  }
+  const py = spawn('python', ['python/safety_analysis.py', file], {
+    cwd: path.join(__dirname, '..'),
+  });
 
-  const scriptPath = path.join(rootDir, 'python', 'safety_analysis.py');
-
-  const py = spawn('python', [scriptPath, clipPath]);
   let stdout = '';
   let stderr = '';
 
@@ -76,8 +75,8 @@ app.get('/safety', (req, res) => {
 
   py.on('close', (code) => {
     if (code !== 0) {
-      console.error('Python script error:', code, stderr);
-      return res.status(500).json({ error: 'Python script failed', details: stderr });
+      console.error('Python script error:', stderr);
+      return res.status(500).json({ error: 'Python script failed' });
     }
 
     try {
