@@ -11,8 +11,8 @@ app.get('/', (req, res) => {
 
 app.get('/mood', (req, res) => {
   const file = req.query.file;
-  if (!file) {
-    return res.status(400).json({ error: 'Missing file parameter' });
+  if (!file || /[^\w.-]/.test(file)) {
+    return res.status(400).json({ error: 'Missing or invalid file parameter' });
   }
 
   const scriptPath = path.join(__dirname, '..', 'python', 'mood_analysis.py');
