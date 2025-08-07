@@ -8,11 +8,19 @@ app = Flask(__name__)
 
 @app.get("/mood")
 def mood():
-    file = request.args.get("file")
-    if not file or not os.path.isfile(file):
-        return jsonify({"error": "Missing or invalid file parameter"}), 400
+    file_path = request.args.get("file")
+    if not file_path:
+        return jsonify({"error": "Missing file parameter"}), 400
+
+    # Security: ensure file is within project directory and is a file
+    project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+    abs_path = os.path.abspath(file_path)
+
+    if not abs_path.startswith(project_root) or not os.path.isfile(abs_path):
+        return jsonify({"error": "File is invalid or outside allowed directory"}), 400
+
     try:
-        return jsonify(analyze_mood(file))
+        return jsonify(analyze_mood(abs_path))
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
