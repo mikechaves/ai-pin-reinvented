@@ -1,15 +1,22 @@
 import sys
 import json
-import math
 import cv2
-import torch
 import numpy as np
 from pathlib import Path
+from yolov5 import YOLOv5
 
 try:
     from moviepy.editor import VideoFileClip
 except Exception:
     VideoFileClip = None
+
+# configuration constants
+MODEL_WEIGHTS = Path(__file__).resolve().parent / "weights" / "yolov5n.pt"
+RELEVANT_CLASSES = {"bicycle", "motorcycle"}
+DANGER_AREA_GROWTH_THRESHOLD = 0.5
+LEFT_BOUNDARY_FACTOR = 1 / 3
+RIGHT_BOUNDARY_FACTOR = 2 / 3
+AUDIO_RMS_INCREASE_FACTOR = 1.3
 
 def analyze(path):
     video_path = Path(path)
@@ -20,9 +27,11 @@ def analyze(path):
     if not cap.isOpened():
         return {"error": "cannot open video"}
 
+    if not MODEL_WEIGHTS.exists():
+        return {"error": f"model weights not found: {MODEL_WEIGHTS}"}
+
     fps = cap.get(cv2.CAP_PROP_FPS) or 30.0
-    model = torch.hub.load('ultralytics/yolov5', 'yolov5n', pretrained=True, verbose=False)
-    relevant = {'bicycle', 'motorcycle'}
+    model = YOLOv5(str(MODEL_WEIGHTS), device='cpu')
 
     first_det = None
     last_det = None
@@ -33,11 +42,11 @@ def analyze(path):
         ret, frame = cap.read()
         if not ret:
             break
-        results = model(frame)
+        results = model.predict([frame])
         detections = []
         for *xyxy, conf, cls in results.xyxy[0].tolist():
-            label = model.names[int(cls)]
-            if label in relevant:
+            label = results.names[int(cls)]
+            if label in RELEVANT_CLASSES:
                 x1, y1, x2, y2 = xyxy
                 area = (x2 - x1) * (y2 - y1)
                 cx = (x1 + x2) / 2.0
@@ -72,15 +81,15 @@ def analyze(path):
         area_growth = (last_det['area'] - first_det['area']) / max(first_det['area'], 1) / max(dt, 1e-6)
         center = last_frame.shape[1] / 2.0
         moving_center = abs(last_det['cx'] - center) < abs(first_det['cx'] - center)
-        if area_growth > 0.5 and moving_center:
+        if area_growth > DANGER_AREA_GROWTH_THRESHOLD and moving_center:
             danger = True
             eta = 1.0 / area_growth if area_growth > 1e-6 else None
             x_center = last_det['cx']
             w = last_frame.shape[1]
-            if x_center < w / 3:
+            if x_center < w * LEFT_BOUNDARY_FACTOR:
                 direction = 'left'
                 suggestion = 'Move right'
-            elif x_center > 2 * w / 3:
+            elif x_center > w * RIGHT_BOUNDARY_FACTOR:
                 direction = 'right'
                 suggestion = 'Move left'
             else:
@@ -104,9 +113,10 @@ def analyze(path):
                 last = audio[-n // 3:]
                 rms1 = np.sqrt(np.mean(first**2))
                 rms2 = np.sqrt(np.mean(last**2))
-                audio_confirm = rms2 > rms1 * 1.3
+                audio_confirm = rms2 > rms1 * AUDIO_RMS_INCREASE_FACTOR
             clip.close()
-        except Exception:
+        except Exception as e:
+            print(f'Audio analysis failed: {e}', file=sys.stderr)
             audio_confirm = None
 
     return {

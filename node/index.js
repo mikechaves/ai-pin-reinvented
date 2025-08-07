@@ -50,12 +50,17 @@ app.get('/mood', async (req, res) => {
 
 app.get('/safety', (req, res) => {
   const file = req.query.file;
-  if (!file || /[^\w./-]/.test(file)) {
-    return res.status(400).json({ error: 'Missing or invalid file parameter' });
+  if (!file) {
+    return res.status(400).json({ error: 'Missing file parameter' });
   }
 
-  const clipPath = path.join(__dirname, '..', file);
-  const scriptPath = path.join(__dirname, '..', 'python', 'safety_analysis.py');
+  const rootDir = path.join(__dirname, '..');
+  const clipPath = path.resolve(rootDir, file);
+  if (!clipPath.startsWith(rootDir + path.sep)) {
+    return res.status(400).json({ error: 'Invalid file path' });
+  }
+
+  const scriptPath = path.join(rootDir, 'python', 'safety_analysis.py');
 
   const py = spawn('python', [scriptPath, clipPath]);
   let stdout = '';
