@@ -9,11 +9,15 @@ This repository re-envisions the Humane AI Pin by developing four novel prototyp
 4. **Point-&-Pair SmartThings Assist** – reads an appliance's logo/QR code with the camera, fetches pairing instructions from SmartThings, and displays voice commands on your hand; one tap pairs the device via BLE/Wi‑Fi.
 
 ## Quick Start
+For a quick demo without setting up a Python virtual environment:
+
 ```bash
 pip install -r python/requirements.txt
 npm install --prefix node
 ./dev_run.sh
 ```
+
+See the sections below for a full development setup with a virtual environment.
 
 ### API Endpoints
 - `GET /mood?file=sample.wav` – Mood-Mirror Coach
