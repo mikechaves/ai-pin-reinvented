@@ -39,6 +39,18 @@ curl "http://localhost:3000/mood?file=sample.wav"
 
 Or open the notebook at `python/notebooks/demo_mood_mirror.ipynb`.
 
+## Spatial Safety Bubble
+Detect fast-approaching bikes or scooters and warn the pedestrian.
+
+### Example
+Generate the sample clip and query the API:
+```bash
+python assets/generate_demo_bike.py
+curl "http://localhost:3000/safety?file=assets/demo_bike.mp4"
+```
+
+See the notebook `python/notebooks/demo_spatial_safety.ipynb` for a demo calling the API.
+
 ## Sprint Cadence
 | Sprint | Duration | Focus | Deliverables | Fidelity & Support |
 |--------|----------|-------|--------------|--------------------|
