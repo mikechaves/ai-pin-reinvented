@@ -11,6 +11,10 @@ app.use((req, res) => {
   res.status(404).json({ error: 'Not Found' });
 });
 
+app.use((req, res) => {
+  res.status(404).json({ error: 'Not Found' });
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
