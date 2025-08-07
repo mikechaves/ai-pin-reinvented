@@ -1,5 +1,6 @@
 const express = require('express');
 const path = require('path');
+const { spawn } = require('child_process');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -45,6 +46,43 @@ app.get('/mood', async (req, res) => {
       .status(500)
       .json({ error: 'Python service request failed', details: err.message });
   }
+});
+
+app.get('/safety', (req, res) => {
+  const file = req.query.file;
+  if (!file || /[^\w./-]/.test(file)) {
+    return res.status(400).json({ error: 'Missing or invalid file parameter' });
+  }
+
+  const clipPath = path.join(__dirname, '..', file);
+  const scriptPath = path.join(__dirname, '..', 'python', 'safety_analysis.py');
+
+  const py = spawn('python', [scriptPath, clipPath]);
+  let stdout = '';
+  let stderr = '';
+
+  py.stdout.on('data', (data) => {
+    stdout += data.toString();
+  });
+
+  py.stderr.on('data', (data) => {
+    stderr += data.toString();
+  });
+
+  py.on('close', (code) => {
+    if (code !== 0) {
+      console.error('Python script error:', code, stderr);
+      return res.status(500).json({ error: 'Python script failed', details: stderr });
+    }
+
+    try {
+      const data = JSON.parse(stdout || '{}');
+      res.json(data);
+    } catch (err) {
+      console.error('Invalid JSON from safety script:', stdout);
+      res.status(500).json({ error: 'Invalid response from Python script' });
+    }
+  });
 });
 
 app.use((req, res) => {
