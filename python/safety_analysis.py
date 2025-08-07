@@ -131,6 +131,6 @@ def analyze(path):
 if __name__ == '__main__':
     if len(sys.argv) < 2:
         print(json.dumps({"error": "usage: python safety_analysis.py <path>"}))
-        sys.exit(0)
+        sys.exit(1)
     result = analyze(sys.argv[1])
     print(json.dumps(result))
