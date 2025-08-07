@@ -1,45 +1,50 @@
 const express = require('express');
-const { spawn } = require('child_process');
 const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const PYTHON_SERVICE_URL = process.env.PYTHON_SERVICE_URL || 'http://localhost:5000';
 
 app.get('/', (req, res) => {
   res.json({ status: 'AI Pin API ready' });
 });
 
-app.get('/mood', (req, res) => {
+app.get('/mood', async (req, res) => {
   const file = req.query.file;
   if (!file || /[^\w.-]/.test(file)) {
     return res.status(400).json({ error: 'Missing or invalid file parameter' });
   }
 
-  const scriptPath = path.join(__dirname, '..', 'python', 'mood_analysis.py');
-  const py = spawn('python3', [scriptPath, file]);
+  const audioPath = path.join(__dirname, '..', file);
 
-  let stdout = '';
-  let stderr = '';
+  try {
+    const url = new URL('/mood', PYTHON_SERVICE_URL);
+    url.searchParams.set('file', audioPath);
+    const response = await fetch(url);
+    const text = await response.text();
 
-  py.stdout.on('data', (data) => {
-    stdout += data;
-  });
-
-  py.stderr.on('data', (data) => {
-    stderr += data;
-  });
-
-  py.on('close', (code) => {
-    if (code !== 0) {
-      return res.status(500).json({ error: stderr.trim() || 'Python process failed' });
+    if (!response.ok) {
+      console.error('Python service error:', response.status, text);
+      return res
+        .status(response.status)
+        .json({ error: 'Python service error', details: text });
     }
+
+    let data;
     try {
-      const result = JSON.parse(stdout);
-      res.json(result);
-    } catch (err) {
-      res.status(500).json({ error: 'Invalid JSON from Python script' });
+      data = JSON.parse(text);
+    } catch (parseErr) {
+      console.error('Invalid JSON from Python service:', text);
+      return res.status(500).json({ error: 'Invalid response from Python service' });
     }
-  });
+
+    res.json(data);
+  } catch (err) {
+    console.error('Failed to call Python service:', err);
+    res
+      .status(500)
+      .json({ error: 'Python service request failed', details: err.message });
+  }
 });
 
 app.use((req, res) => {
