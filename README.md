@@ -20,8 +20,9 @@ Run the mood analysis service:
 
 ```bash
 cd python
-python mood_service.py
+gunicorn -b 0.0.0.0:5000 mood_service:app
 ```
+The above uses Gunicorn for a production-ready server. For quick local testing you can still run `python mood_service.py`.
 
 ### Node
 ```bash

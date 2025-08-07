@@ -21,10 +21,29 @@ app.get('/mood', async (req, res) => {
     const url = new URL('/mood', PYTHON_SERVICE_URL);
     url.searchParams.set('file', audioPath);
     const response = await fetch(url);
-    const data = await response.json();
-    res.status(response.status).json(data);
+    const text = await response.text();
+
+    if (!response.ok) {
+      console.error('Python service error:', response.status, text);
+      return res
+        .status(response.status)
+        .json({ error: 'Python service error', details: text });
+    }
+
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch (parseErr) {
+      console.error('Invalid JSON from Python service:', text);
+      return res.status(500).json({ error: 'Invalid response from Python service' });
+    }
+
+    res.json(data);
   } catch (err) {
-    res.status(500).json({ error: 'Python service request failed' });
+    console.error('Failed to call Python service:', err);
+    res
+      .status(500)
+      .json({ error: 'Python service request failed', details: err.message });
   }
 });
 

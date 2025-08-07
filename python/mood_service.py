@@ -18,4 +18,7 @@ def mood():
 
 
 if __name__ == "__main__":
+    # The built-in Flask server is for local development only.
+    # For production, run with a WSGI server such as:
+    #   gunicorn -b 0.0.0.0:5000 mood_service:app
     app.run(host="0.0.0.0", port=5000)
