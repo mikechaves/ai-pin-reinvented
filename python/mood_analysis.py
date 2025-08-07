@@ -34,7 +34,8 @@ def main():
 
         model = whisper.load_model("tiny")
         result = model.transcribe(audio_path)
-        words = len(result.get("text", "").strip().split())
+        text = result.get("text", "").strip()
+        words = len(text.split()) if text else 0
         wpm = words / duration_minutes if duration_minutes > 0 else 0
 
         if wpm > HIGH_WPM_THRESHOLD or rms > HIGH_RMS_THRESHOLD:
