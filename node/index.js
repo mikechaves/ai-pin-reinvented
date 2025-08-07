@@ -16,7 +16,7 @@ app.get('/mood', (req, res) => {
   }
 
   const scriptPath = path.join(__dirname, '..', 'python', 'mood_analysis.py');
-  const py = spawn('python', [scriptPath, file]);
+  const py = spawn('python3', [scriptPath, file]);
 
   let stdout = '';
   let stderr = '';
