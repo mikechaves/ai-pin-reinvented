@@ -7,7 +7,7 @@ from yolov5 import YOLOv5
 
 try:
     from moviepy.editor import VideoFileClip
-except Exception:
+except ImportError:
     VideoFileClip = None
 
 # configuration constants
