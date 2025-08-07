@@ -23,6 +23,14 @@ npm install
 npm start
 ```
 
+Once the server is running, try the Mood-Mirror API:
+
+```bash
+curl "http://localhost:3000/mood?file=sample.wav"
+```
+
+Or open the notebook at `python/notebooks/demo_mood_mirror.ipynb`.
+
 ## Sprint Cadence
 | Sprint | Duration | Focus | Deliverables | Fidelity & Support |
 |--------|----------|-------|--------------|--------------------|

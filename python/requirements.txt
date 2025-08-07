@@ -3,3 +3,6 @@ opencv-python==4.9.0.80
 openai-whisper==20231117
 yolov5==7.0.14
 jupyterlab==4.2.3
+librosa==0.10.1
+soundfile==0.12.1
+requests==2.31.0
