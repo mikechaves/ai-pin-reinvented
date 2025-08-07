@@ -16,6 +16,13 @@ source .venv/bin/activate  # On Windows use: .venv\Scripts\activate
 pip install -r python/requirements.txt
 ```
 
+Run the mood analysis service:
+
+```bash
+cd python
+python mood_service.py
+```
+
 ### Node
 ```bash
 cd node
@@ -23,7 +30,7 @@ npm install
 npm start
 ```
 
-Once the server is running, try the Mood-Mirror API:
+Once both servers are running, try the Mood-Mirror API:
 
 ```bash
 curl "http://localhost:3000/mood?file=sample.wav"
