@@ -12,7 +12,7 @@ This repository re-envisions the Humane AI Pin by developing four novel prototyp
 ### Python
 ```bash
 python3 -m venv .venv
-source .venv/bin/activate
+source .venv/bin/activate  # On Windows use: .venv\Scripts\activate
 pip install -r python/requirements.txt
 ```
 
